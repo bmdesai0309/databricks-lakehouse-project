@@ -1,0 +1,51 @@
+{
+  "source_name": "pharmacy_claims",
+  "data_format": "parquet",
+  "storage": {
+    "raw_path": "/Volumes/workspace/default/pharmacy_data",
+    "partition_columns": ["year", "month", "day"]
+  },
+  "unity_catalog": {
+    "catalog": "workspace",
+    "schema": "pharmacy_reporting",
+    "bronze_table": "brz_claims",
+    "silver_table": "slv_claims",
+    "gold_table": "gld_prescription_summary"
+  },
+  "schema_definition": [
+    {"column": "prescription_id", "type": "string", "nullable": false},
+    {"column": "patient_id", "type": "string", "nullable": false},
+    {"column": "drug_name", "type": "string", "nullable": false},
+    {"column": "dosage_mg", "type": "integer", "nullable": true},
+    {"column": "quantity", "type": "integer", "nullable": true},
+    {"column": "unit_price", "type": "double", "nullable": true},
+    {"column": "pharmacy_npi", "type": "string", "nullable": false},
+    {"column": "fill_date", "type": "date", "nullable": false}
+  ],
+  "data_quality_rules": [
+    {
+      "name": "valid_prescription_id",
+      "column": "prescription_id",
+      "expectation": "prescription_id IS NOT NULL",
+      "action": "FAIL_PIPELINE"
+    },
+    {
+      "name": "positive_quantity",
+      "column": "quantity",
+      "expectation": "quantity > 0",
+      "action": "FAIL_PIPELINE"
+    },
+    {
+      "name": "valid_npi_length",
+      "column": "pharmacy_npi",
+      "expectation": "LENGTH(pharmacy_npi) = 10",
+      "action": "FAIL_PIPELINE"
+    },
+    {
+      "name": "drug_name_not_empty",
+      "column": "drug_name",
+      "expectation": "TRIM(drug_name) != ''",
+      "action": "FAIL_PIPELINE"
+    }
+  ]
+}
